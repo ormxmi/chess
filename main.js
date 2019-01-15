@@ -5,7 +5,7 @@ selectedPieceBool = false; selectedPieceCoords = []; var playerTurn = "w"; var w
 var lastMovedPiece = [];
 var board = [[['R','w',[0,0]],['N','w',[0,1]],['B','w',[0,2]],['Q','w',[0,3]],['K','w',[0,4]],['B','w',[0,5]],['N','w',[0,6]],['R','w',[0,7]]],[['P','w',[1,0],true],['P','w',[1,1],true],['P','w',[1,2],true],['P','w',[1,3],true],['P','w',[1,4],true],['P','w',[1,5],true],['P','w',[1,6],true],['P','w',[1,7],true]],[[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[]],[['P','b',[6,0],true],['P','b',[6,1],true],['P','b',[6,2],true],['P','b',[6,3],true],['P','b',[6,4],true],['P','b',[6,5],true],['P','b',[6,6],true],['P','b',[6,7],true]],[['R','b',[7,0]],['N','b',[7,1]],['B','b',[7,2]],['Q','b',[7,3]],['K','b',[7,4]],['B','b',[7,5]],['N','b',[7,6]],['R','b',[7,7]]]]
 let piecesWidth = 64;var invalidMovePlayed=false; 
-var backupLegalMoves;var backupFrom, backupTo;
+var backupLegalMoves;var backupFrom, backupTo;var backupBoard;var bto,bfrom,btoCoords,bfromCoords;
 
 if(window.innerWidth<=512){
     piecesWidth = window.innerWidth/8;
@@ -371,12 +371,12 @@ document.getElementsByClassName("board")[0].onclick = function(e){
             if(board[squareClickedY][squareClickedX][1]!==playerTurn) selectedPieceBool = false;
         }
         else{
-                if(movePiece(selectedPieceCoords,[squareClickedY,squareClickedX],playerTurn)){
+                if(movePiece(selectedPieceCoords,[squareClickedY,squareClickedX],false)){
                  lastMovedPiece[0]=board[squareClickedY][squareClickedX][0];
                  lastMovedPiece[1]=board[squareClickedY][squareClickedX][1];
                  lastMovedPiece[2]=selectedPieceCoords;
                  lastMovedPiece[3]=[squareClickedY,squareClickedX];  
-             
+                   
                     let currentPiece =  document.getElementById(selectedPieceCoords[0].toString()+selectedPieceCoords[1]);
                     if(currentPiece.style.transform==""){
                         currentPiece.style.transform = "translate("+(squareClickedX-selectedPieceCoords[1])+"00%, -"+(squareClickedY-selectedPieceCoords[0])+"00%)"; 
@@ -418,7 +418,7 @@ document.getElementsByClassName("board")[0].onclick = function(e){
             if(board[squareClickedY][squareClickedX][1]!==playerTurn) selectedPieceBool = false;
         }
         else{
-            if(movePiece(selectedPieceCoords,[squareClickedY,squareClickedX],playerTurn)){
+            if(movePiece(selectedPieceCoords,[squareClickedY,squareClickedX],false)){
                 lastMovedPiece[0]=board[squareClickedY][squareClickedX][0];
                 lastMovedPiece[1]=board[squareClickedY][squareClickedX][1];
                 lastMovedPiece[2]=selectedPieceCoords;
@@ -467,17 +467,29 @@ function selectPiece(y,x){
         selectedPieceBool = true;
     }
 }
-function movePiece(from,to,playerTurn){
+
+function boardChangeSquares(to,from){
+
+    console.log("legal move!");
+    bto = board[to[0]][to[1]];
+    btoCoords = [to[0],to[1]];
+    bfromCoords = [from[0],from[1]];
+    board[to[0]][to[1]] = board[from[0]][from[1]];
+    board[from[0]][from[1]]=[];
+    return true;
+}
+
+
+function movePiece(from,to,onlyRead){
     var backupLegalMoves = Array.from(legalMoves);
-    if(isLegalMove(from,to,false)){
+
+    if(isLegalMove(from,to,onlyRead)){
+    
         if((!nextKingMoveLegal(to,true))&&board[from[0]][from[1]][0]=='K') return false; //if trying to move the king but the move is illegal
         if(playerTurn=='w'&&whiteKingChecked){ 
             if((nextKingMoveLegal(to,true))&&board[from[0]][from[1]][0]=='K'){ //if trying to move the king while checked and the move is legal(for the king)
                 invalidMovePlayed = false;
-                console.log("legal move!");
-                board[to[0]][to[1]] = board[from[0]][from[1]];
-                board[from[0]][from[1]]=[];
-                return true;
+                
             }
             else{ //if trying to move the king while checked and the move is illegal(for the king)
                   // check the legal moves for other pieces
@@ -487,10 +499,7 @@ function movePiece(from,to,playerTurn){
                   
                     if(to[0]==backupLegalMoves[i][0]&&to[1]==backupLegalMoves[i][1]){
                         invalidMovePlayed = false;
-                        console.log("legal move!");
-                        board[to[0]][to[1]] = board[from[0]][from[1]];
-                        board[from[0]][from[1]]=[];
-                        return true;
+                        if(boardChangeSquares(to,from)) return true;
                     }
                 }
                 console.log("white king is under check!");
@@ -501,10 +510,7 @@ function movePiece(from,to,playerTurn){
         else if(playerTurn=='b'&&blackKingChecked){
             if((nextKingMoveLegal(to,true))&&board[from[0]][from[1]][0]=='K'){ //if trying to move the king while checked and the move is legal(for the king)
                 invalidMovePlayed = false;
-                console.log("legal move!");
-                board[to[0]][to[1]] = board[from[0]][from[1]];
-                board[from[0]][from[1]]=[];
-                return true;
+                if(boardChangeSquares(to,from)) return true;
             }
             else{ //if trying to move the king while checked and the move is illegal(for the king)
                   // check the legal moves for other pieces
@@ -514,10 +520,7 @@ function movePiece(from,to,playerTurn){
                     console.log(to[0],backupLegalMoves[i][0],to[1],backupLegalMoves[i][1])
                     if(to[0]==backupLegalMoves[i][0]&&to[1]==backupLegalMoves[i][1]){
                         invalidMovePlayed = false;
-                        console.log("legal move!");
-                        board[to[0]][to[1]] = board[from[0]][from[1]];
-                        board[from[0]][from[1]]=[];
-                        return true;
+                        if(boardChangeSquares(to,from)) return true;
                     }
                 }
                 console.log("black is under check!");
@@ -526,10 +529,7 @@ function movePiece(from,to,playerTurn){
         }
         
                 invalidMovePlayed = false;
-                console.log("legal move!");
-                board[to[0]][to[1]] = board[from[0]][from[1]];
-                board[from[0]][from[1]]=[];
-                return true;
+                if(boardChangeSquares(to,from)) return true;
     }
     else{
         invalidMovePlayed = true;
@@ -539,8 +539,7 @@ function movePiece(from,to,playerTurn){
 }
 function isLegalMove(from,to,onlyRead){
     
-
-
+    
     if(!onlyRead){
     
         backupFrom = board[from[0]][from[1]];
@@ -553,7 +552,7 @@ function isLegalMove(from,to,onlyRead){
                     if(!nextKingMoveLegal([y,x],false)){
                         board[to[0]][to[1]]=backupTo;
                         board[from[0]][from[1]]=backupFrom;
-                        return false;
+                       
                     }
                     else{
                         board[to[0]][to[1]]=backupTo;
@@ -563,26 +562,40 @@ function isLegalMove(from,to,onlyRead){
             }
         }
     }
+  
     switch(board[from[0]][from[1]][0]){
         case 'R': 
+     
             if(axisMove(from,to,onlyRead)) return true;
             else return false;
         case 'P':
+       
+     
             if(pawnMove(from,to,onlyRead)) return true;
             else return false;
         case 'N':
+        
             if(knightMove(from,to,onlyRead)) return true;
             else return false;
         case 'B':
+        
             if(diagonalMove(from,to,onlyRead)) return true;
             else return false;
         case 'Q':
+     
             if(diagonalMove(from,to,onlyRead)||axisMove(from,to,onlyRead)) return true;
             else return false;
         case 'K':
+       
             if(kingMove(from,to,onlyRead)) return true;
-            else return false;
-        default: return false;
+            else{
+              
+                return false;
+            }
+            
+        default:
+      
+        return false;
         
     }
 }
@@ -590,7 +603,7 @@ function moveOrTake(playerMoving,square,onlyRead){
     
     if(board[square[0]][square[1]].length>=1){
         if(board[square[0]][square[1]][1]!==playerMoving){
-            moveAndTake(playerMoving,square);
+            moveAndTake(square,onlyRead);
             return true;
         }
         else{
@@ -601,14 +614,13 @@ function moveOrTake(playerMoving,square,onlyRead){
         return true;
     }
 }
-function moveAndTake(playerMoving,square){
-    
-        let pieceToRemove =  document.getElementById(square[0].toString()+square[1].toString());
-        setTimeout(()=>{
-            pieceToRemove.outerHTML = "";
-        },150)
-    
-    
+function moveAndTake(square,onlyRead){
+        if(!onlyRead){
+            let pieceToRemove =  document.getElementById(square[0].toString()+square[1].toString());
+            setTimeout(()=>{
+                pieceToRemove.outerHTML = "";
+            },150)
+        }
 }
 function axisMove(from,to,onlyRead){
     if(from[0]==to[0]){     //  moving horizontally
@@ -667,7 +679,7 @@ function axisMove(from,to,onlyRead){
         }
 
        
-        return true;
+  
     }
     else return false;
 }
@@ -737,35 +749,84 @@ function pawnMove(from,to,onlyRead){
             return true;
         }
         else if(to[0]==from[0]+1 && to[1]==from[1]+1){ //1up and right - taking
-           
-            if(!onlyRead){
-                board[from[0]][from[1]][3] = false;
-                if(!moveAndTake(playerTurn,[from[0]+1,from[1]+1])){
-                    return false;
+            if(board[to[0]][to[1]].length!==0){
+                if(!onlyRead){
+                    board[from[0]][from[1]][3] = false;
+                    if(!moveOrTake(playerTurn,[from[0]+1,from[1]+1])){
+                        return false;
+                    }
+                    else return true;
                 }
-                else return true;
+                else{
+                    
+                    if(!moveOrTake(playerTurn,[from[0]+1,from[1]+1],true)) return false;
+                    else return true;
+                }
             }
-            else{
-                
-                if(!moveAndTake(playerTurn,[from[0]+1,from[1]+1],true)) return false;
-                else return true;
-            }
+            else return false;
         }
         else if(to[0]==from[0]+1 && to[1]==from[1]-1){ //1up and left - taking
-            if(!onlyRead){
-                board[from[0]][from[1]][3] = false;
-                if(!moveAndTake(playerTurn,[from[0]+1,from[1]-1])) return false;
-                else return true;
+            if(board[to[0]][to[1]].length!==0){
+                if(!onlyRead){
+                    board[from[0]][from[1]][3] = false;
+                    if(!moveOrTake(playerTurn,[from[0]+1,from[1]-1])) return false;
+                    else return true;
+                }
+                else{
+                    if(!moveOrTake(playerTurn,[from[0]+1,from[1]-1],true)) return false;
+                    else return true;
+                }
             }
-            else{
-                if(!moveAndTake(playerTurn,[from[0]+1,from[1]-1],true)) return false;
-                else return true;
-            }
+            else return false;
         } 
-        
         else return false;
     }
-
+    else{
+        if(board[from[0]][from[1]][3]==true && to[0]==from[0]-2 && to[1]==from[1] && board[from[0]-1][from[1]].length==0 && board[from[0]-1][from[1]].length==0){ //2 up
+            if(!onlyRead) board[from[0]][from[1]][3] = false;
+            return true;
+        }
+        else if(to[0]==from[0]-1 && to[1]==from[1] && board[from[0]-1][from[1]].length==0){ //1 up
+            if(!onlyRead) board[from[0]][from[1]][3] = false;
+            return true;
+        }
+        else if(to[0]==from[0]-1 && to[1]==from[1]+1){ //1up and right - taking
+          
+            if(board[to[0]][to[1]].length!==0){
+                
+                if(!onlyRead){
+                    board[from[0]][from[1]][3] = false;
+                    if(!moveOrTake(playerTurn,[from[0]-1,from[1]+1])){
+                        return false;
+                    }
+                    else return true;
+                }
+                else{
+                    
+                    if(!moveOrTake(playerTurn,[from[0]-1,from[1]+1],true)) return false;
+                    else return true;
+                        }
+                    }
+            else return false;
+            }
+            
+        else if(to[0]==from[0]-1 && to[1]==from[1]-1){ //1up and left - taking
+            if(board[to[0]][to[1]].length!==0){
+                if(!onlyRead){
+                    board[from[0]][from[1]][3] = false;
+                    if(!moveOrTake(playerTurn,[from[0]-1,from[1]-1])) return false;
+                    else return true;
+                }
+                else{
+                    if(!moveOrTake(playerTurn,[from[0]-1,from[1]-1],true)) return false;
+                    else return true;
+                }
+            }
+            else return false;
+        } 
+        else return false;
+    }
+    
 
 
 
@@ -777,10 +838,18 @@ function pawnMove(from,to,onlyRead){
 function knightMove(from,to,onlyRead){
     if(from[0]+2==to[0]){
         if(from[1]+1==to[1]){
+            if(onlyRead){
+                if(moveOrTake(playerTurn,[to[0],to[1]],true)) return true;
+                else return false;
+            }
             if(moveOrTake(playerTurn,[to[0],to[1]])) return true;
             else return false;
         }
         else if(from[1]-1==to[1]){
+            if(onlyRead){
+                if(moveOrTake(playerTurn,[to[0],to[1]],true)) return true;
+                else return false;
+            }
             if(moveOrTake(playerTurn,[to[0],to[1]])) return true;
             else return false;
         }
@@ -788,10 +857,18 @@ function knightMove(from,to,onlyRead){
     }
     if(from[0]-2==to[0]){
         if(from[1]+1==to[1]){
+            if(onlyRead){
+                if(moveOrTake(playerTurn,[to[0],to[1]],true)) return true;
+                else return false;
+            }
             if(moveOrTake(playerTurn,[to[0],to[1]])) return true;
             else return false;
         }
         else if(from[1]-1==to[1]){
+            if(onlyRead){
+                if(moveOrTake(playerTurn,[to[0],to[1]],true)) return true;
+                else return false;
+            }
             if(moveOrTake(playerTurn,[to[0],to[1]])) return true;
             else return false;
         }
@@ -799,10 +876,18 @@ function knightMove(from,to,onlyRead){
     }
     if(from[0]-1==to[0]){
         if(from[1]+2==to[1]){
+            if(onlyRead){
+                if(moveOrTake(playerTurn,[to[0],to[1]],true)) return true;
+                else return false;
+            }
             if(moveOrTake(playerTurn,[to[0],to[1]])) return true;
             else return false;
         }
         else if(from[1]-2==to[1]){
+            if(onlyRead){
+                if(moveOrTake(playerTurn,[to[0],to[1]],true)) return true;
+                else return false;
+            }
             if(moveOrTake(playerTurn,[to[0],to[1]])) return true;
             else return false;
         }
@@ -810,10 +895,18 @@ function knightMove(from,to,onlyRead){
     }
     if(from[0]+1==to[0]){
         if(from[1]+2==to[1]){
+            if(onlyRead){
+                if(moveOrTake(playerTurn,[to[0],to[1]],true)) return true;
+                else return false;
+            }
             if(moveOrTake(playerTurn,[to[0],to[1]])) return true;
             else return false;
         }
         else if(from[1]-2==to[1]){
+            if(onlyRead){
+                if(moveOrTake(playerTurn,[to[0],to[1]],true)) return true;
+                else return false;
+            }
             if(moveOrTake(playerTurn,[to[0],to[1]])) return true;
             else return false;
         }
@@ -824,27 +917,47 @@ function kingMove(from,to,onlyRead){
     if((from[0]+1==to[0]&&from[1]==to[1])||(from[0]==to[0]&&from[1]+1==to[1])||(from[0]+1==to[0]&&from[1]+1==to[1])
     ||(from[0]-1==to[0]&&from[1]+1==to[1])||(from[0]-1==to[0]&&from[1]==to[1])||(from[0]-1==to[0]&&from[1]-1==to[1])
     ||(from[0]==to[0]&&from[1]-1==to[1])||(from[0]+1==to[0]&&from[1]-1==to[1])){
-    
+ 
         if(nextKingMoveLegal(to,true)){
-         
-            if(moveOrTake(playerTurn,[to[0],to[1]])) return true;
+            if(onlyRead){
+            
+                if(moveOrTake(playerTurn,[to[0],to[1]],true)) return true;
+                else return false;
+            }else{
+             
+                if(moveOrTake(playerTurn,[to[0],to[1]])) return true;
+                else return false;
+            }
+            
         }
         else return false;
     }
 }
 var legalMovesAvailable = false; var possibleMoves = [];
 function isCheckmated(){
+    var isCheckmatedPossibleMoves = Array.from(legalMoves);
+    
+    
+ 
     for(var y = 0; y<=7; y++){
         for(var x = 0; x<=7; x++){
             if(board[y][x].length!==0&&board[y][x][1]==playerTurn){
-                for(var y1 = 0; y1<=7;y1++){
-                    for(var x1 = 0; x1<=7;x1++){
-                        if(isLegalMove([y,x],[y1,x1],true)){
-                            possibleMoves.push([y,x],[y1,x1]);
-                            legalMovesAvailable = true;
-                        }
-                    }  
+
+
+                for(var i = 0; i<isCheckmatedPossibleMoves.length;i++){
+                    if(movePiece([y,x],isCheckmatedPossibleMoves[i],true)){
+                        
+                        board[bfromCoords[0]][bfromCoords[1]] = board[btoCoords[0]][btoCoords[1]];
+                        board[btoCoords[0]][btoCoords[1]] = bto;
+                        let possibleMove = [y,x," ",isCheckmatedPossibleMoves[i]];
+                        possibleMoves.push(possibleMove);
+                        legalMovesAvailable = true;
+                    }
                 }
+
+
+
+
             }
         }
     }
@@ -853,6 +966,7 @@ function isCheckmated(){
     }
     else{
         console.log("kings not checked");
+        
         console.log(possibleMoves);
     }
 }
