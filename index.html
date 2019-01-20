@@ -11,9 +11,28 @@
 
 </head>
 <body>
+    <div class="modal-background">
+        <div class="modal-container modal-won-game">
+            <p> <span id="who-won-span-modal">Black</span> won the game!</p>
+            <span class="type-of-loss-container"><span id="who-lost-span-modal">White</span><span id="type-of-loss-span-modal">is checkmated</span></span>
+            <button class="btn-modal btn-play-again">Play again</button>
+            <button class="btn-modal btn-return">Return</button>
+        </div>
+    </div>
    <div class="container">
+        <div class="score-div">
+             <div class="score-inner score-inner-white">
+                 <span id="score-white-span">0</span>
+                 <p>White</p>
+             </div>
+             <span class="two-dots-center">:</span>
+             <div class="score-inner score-inner-black">
+                 <span id="score-black-span">0</span>
+                 <p>Black</p>
+            </div>
+        </div>
        <div class="board">
-           
+
                 <div class="piece rook-black" id="70"></div><div class="piece knight-black" id="71">
                 </div><div class="piece bishop-black" id="72"></div><div class="piece queen-black" id="73">
                 </div><div class="piece king-black" id="74"></div><div class="piece bishop-black" id="75">
@@ -37,6 +56,7 @@
                 </div>   
     
             </div>
+            <h1 style="position: absolute; top: 80%; left: 50%; transform: translateX(-50%); font-family: 'Open Sans',sans-serif;">CTRL + Z za da vurne6 1 hod!!!! </h1>
        </div>
    </div>
     
