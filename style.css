@@ -9,37 +9,61 @@
 html, body{
     width: 100%;
     height: 100%;
-    background-color: black;
+    background-color: #eee;
 }
 
 .container{
     position: relative;
     margin: 0 auto;
     max-width: 1000px;
-    background-color: #bbb;
+    background-color: #eee;
     height: 100%;
     overflow: auto;
 }
 .board{
+    box-sizing: content-box;
     height: 512px;
     width: 512px;
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 23%;
+    left: 0%;
     background-image: url(img/board/board.png);
+    border: 2px solid black;
 }
-
+.moves-history{
+    position: absolute;
+    height: 200px;
+    width: 300px;
+    right: 5%;
+    top: 23%;
+    background-color: #fff;
+    box-shadow: 1px 1px 1px rgba(255,255,255,0.25), 0 5px 5px rgba(0,0,0,0.22);
+    padding: 7px;
+    padding-left: 12px;
+    overflow-y: scroll;
+}
+.moves-history-span{
+    display: inline-block;
+    padding: 3px;
+    font-family: 'Open Sans',sans-serif;
+    font-size: 20px;
+}
+.moves-history-span-counter{
+    font-family: 'Courier New', Courier, 'monospace';
+    font-size: 17px;
+}
 .score-div{
-    margin-top: 80px;
-    height: 95px;
-    background-color: white;
+    margin-top: 2.15vw;
+    height: calc(45px + 3.5vw);
+    background-color: #fff;
     width: 100%;
+    box-shadow: 1px 1px 1px rgba(255,255,255,0.25), 0 5px 5px rgba(0,0,0,0.22);
+
 }
 
 .score-div>span{
     position: absolute;
-    font-size: 60px;
+    font-size: 5%;
     left: 50%;
     transform: translate(-50%,0px);
 }
@@ -50,7 +74,7 @@ html, body{
     font-family: 'Sarabun', sans-serif;
 }
 .score-inner>span{
-    font-size: 50px;
+    font-size: calc(10px + 3vw);
     
 }
 .score-inner>p{
@@ -96,7 +120,9 @@ html, body{
     font-family: 'Open Sans', sans-serif;
     text-align: center;
 }
-
+.two-dots-center{
+    font-size: calc(20px + 3vw) !important;
+}
 .btn-modal{
     font-size: 17px;
     font-family: 'Open Sans', sans-serif;
@@ -143,6 +169,14 @@ html, body{
     top: 61px;
     left: 50%;
     transform: translateX(-50%);
+}
+
+.square-frame{
+    position: absolute;
+   
+    height: 64px;
+    width: 64px;
+    background-image: url(img/square-board.png);
 }
 
 
@@ -218,6 +252,18 @@ html, body{
         width: calc(100vw / 8);
     }
     .score-div{
-        margin-top: 40px;
+        margin-top: 7vw;
+    }
+}
+@media (min-width: 1000px){
+    
+    .score-div{
+        height: calc(45px + 35px);
+    }
+    .score-inner>span{
+        font-size: calc(10px + 30px);
+    }
+    .two-dots-center{
+        font-size: calc(20px + 30px) !important;
     }
 }
