@@ -12,6 +12,11 @@ var currentPieceHTML;
 var movesHistory = [];
 var selectedPiece = false;let squaresToCheck ;
 let largerPos = 0, lesserPos = 0;  points = [0,0];
+let ctrlClicked = false; zClicked = false;
+var pieceMoveSoundFx = new Audio('sounds/piece-move.wav');
+pieceMoveSoundFx.volume = 0.3;
+
+
 /////////////
 init();//////
 /////////////
@@ -37,6 +42,7 @@ function onBoardClick(e){
 }
 
 function selectPiece(y,x){
+
     if(board[y][x][1]==playerTurn){
         selectedPiece = true;
         showAvailableMoves(y,x);
@@ -51,7 +57,7 @@ function selectPiece(y,x){
 }
 
 function showAvailableMoves(y,x){
-
+    
     removeOtherFrames();
     availableMoves = [];
     currentPieceCoords = [y,x];
@@ -460,7 +466,7 @@ function updateMovesHistoryHTML(side){
     
     if(side=='w'){
         
-        if(movesPlayed!=1){
+        if(movesPlayed!==1){
             
             var newSpanContainer = document.createElement('SPAN');
             newSpanContainer.setAttribute("class","moves-history-span");
@@ -479,11 +485,11 @@ function updateMovesHistoryHTML(side){
             pieceName = "";
         }
         newSpanWhiteMove.innerHTML = pieceName + moveName+" ";
+
         document.getElementsByClassName("moves-history-span")[document.getElementsByClassName("moves-history-span").length-1].appendChild(newSpanWhiteMove);
     }
     else{
         movesPlayed++;
-        //document.getElementsByClassName("moves-history-span")[document.getElementsByClassName("moves-history-span").length-1].appendChild();
         var newSpanBlackMove = document.createElement("SPAN");
         newSpanBlackMove.setAttribute("class","moves-history-span-black");
         console.log(moveName);
@@ -514,7 +520,7 @@ function movePieceTrue(y,x){
             pieceToRemove.outerHTML = "";
         },100)
     } 
-
+    pieceMoveSoundFx.play();
     board[y][x] = currentPiece[currentPiece.length-1];
     board[currentPiece[currentPiece.length-1][2][0]][currentPiece[currentPiece.length-1][2][1]] = [];
     board[y][x][2] = [y,x];
@@ -522,11 +528,11 @@ function movePieceTrue(y,x){
 
     
     updateMovesHistoryHTML(playerTurn);
+    lastMoveHighlighter();
 
     if(playerTurn == 'w') playerTurn = 'b';
     else playerTurn = 'w'
-    
-    
+  
     if(!nextKingMoveLegal(findKing(),findKing())){
         console.log(playerTurn,"checked");
         let isNotCheckmated = false;
@@ -547,13 +553,27 @@ function movePieceTrue(y,x){
         if(!isNotCheckmated){
             let winner;
             if(playerTurn == 'w') winner = 'b';
-            else winner = 'b';
+            else winner = 'w';
             gameEnd(winner,"checkmate")
         }
     }
     
         
     
+}
+
+function lastMoveHighlighter(){
+    let offsetTopHighlight = 1, offsetLeftHighlight = 0;
+    if(window.innerWidth<=512){
+         offsetTopHighlight = 3;
+         offsetLeftHighlight = 3;
+    }
+    document.getElementsByClassName("last-move-start")[0].style.display = "block";
+    document.getElementsByClassName("last-move-start")[0].style.top = (piecesWidth*7 - currentPieceCoords[0]*piecesWidth- offsetTopHighlight)+"px";
+    document.getElementsByClassName("last-move-start")[0].style.left = (currentPieceCoords[1]*piecesWidth -  offsetLeftHighlight)+"px";
+    document.getElementsByClassName("last-move-end")[0].style.display = "block";
+    document.getElementsByClassName("last-move-end")[0].style.top = (piecesWidth*7 - movesHistory[movesHistory.length-1][0][0]*piecesWidth- offsetTopHighlight)+"px";
+    document.getElementsByClassName("last-move-end")[0].style.left = (movesHistory[movesHistory.length-1][0][1]*piecesWidth-offsetLeftHighlight)+"px";
 }
 
 function updateBoardVisualHTML(y,x){
@@ -570,12 +590,21 @@ function updateBoardVisualHTML(y,x){
 }
 
 function appendFrame(y,x){
-    
-    let newFrame = document.createElement("DIV");
-    newFrame.setAttribute("class","square-frame");
-    newFrame.style.top = (512 - 65 - y*64).toString() + "px";
-    newFrame.style.left = (x*64).toString() + "px";
-    document.getElementsByClassName("board")[0].appendChild(newFrame);
+    if(piecesWidth<64){
+        let newFrame = document.createElement("DIV");
+        newFrame.setAttribute("class","square-frame");
+        newFrame.style.top = (piecesWidth*8 - piecesWidth-3- y*piecesWidth).toString() + "px";
+        newFrame.style.left = (x*piecesWidth-2).toString() + "px";
+        document.getElementsByClassName("board")[0].appendChild(newFrame);
+    }
+    else{
+        let newFrame = document.createElement("DIV");
+        newFrame.setAttribute("class","square-frame");
+        newFrame.style.top = (512 - 65 - y*64).toString() + "px";
+        newFrame.style.left = (x*64).toString() + "px";
+        document.getElementsByClassName("board")[0].appendChild(newFrame);
+    }
+
 }
 function removeOtherFrames(){
     
@@ -591,23 +620,35 @@ function init(){
 
     if(window.innerWidth<=512){
         piecesWidth = window.innerWidth/8;
+        for(var i = 0;i<=7;i++){
+            document.getElementById("7"+i.toString()).style = "top: 0; left: "+(i*piecesWidth-2)+"px;";
+        }
+        for(var i = 0;i<=7;i++){
+            document.getElementById("6"+i.toString()).style = "top: "+(piecesWidth)+"px; left: "+(i*piecesWidth-2)+"px;";
+        }
+        for(var i = 0;i<=7;i++){
+            document.getElementById("0"+i.toString()).style = "top: "+(piecesWidth*7-2)+"px; left: "+(i*piecesWidth-2)+"px;";
+        }
+        for(var i = 0;i<=7;i++){
+            document.getElementById("1"+i.toString()).style = "top: "+(piecesWidth*6-2)+"px; left: "+(i*piecesWidth-2)+"px;";
+        }
     }
-
-    for(var i = 0;i<=7;i++){
-        document.getElementById("7"+i.toString()).style = "top: 0; left: "+i*piecesWidth+"px;";
-    }
-    for(var i = 0;i<=7;i++){
-        document.getElementById("6"+i.toString()).style = "top: "+piecesWidth+"px; left: "+i*piecesWidth+"px;";
-    }
-    for(var i = 0;i<=7;i++){
-        document.getElementById("0"+i.toString()).style = "top: "+(512-64)+"px; left: "+i*piecesWidth+"px;";
-    }
-    for(var i = 0;i<=7;i++){
-        document.getElementById("1"+i.toString()).style = "top: "+(512-128)+"px; left: "+i*piecesWidth+"px;";
-    }
-
+    else{
+        for(var i = 0;i<=7;i++){
+            document.getElementById("7"+i.toString()).style = "top: 0; left: "+(i*piecesWidth)+"px;";
+        }
+        for(var i = 0;i<=7;i++){
+            document.getElementById("6"+i.toString()).style = "top: "+(piecesWidth)+"px; left: "+(i*piecesWidth)+"px;";
+        }
+        for(var i = 0;i<=7;i++){
+            document.getElementById("0"+i.toString()).style = "top: "+(piecesWidth*7)+"px; left: "+(i*piecesWidth)+"px;";
+        }
+        for(var i = 0;i<=7;i++){
+            document.getElementById("1"+i.toString()).style = "top: "+(piecesWidth*6)+"px; left: "+(i*piecesWidth)+"px;";
+        }
+    }   
 }
-let ctrlClicked = false; zClicked = false;
+
 document.addEventListener('keydown', function(event) {
     if(event.keyCode == 17){
         ctrlClicked = true;
@@ -655,7 +696,10 @@ function moveBackwards(){
     let lastPiece = document.getElementById(movesHistory[movesHistory.length-1][0]); //vrushtame sushtestvuvashtata figura nazad
     lastPiece.style.top = movesHistory[movesHistory.length-1][1]; //
     lastPiece.style.left = movesHistory[movesHistory.length-1][2]; //
-    lastPiece.id = (7- (movesHistory[movesHistory.length-1][1].slice(0,-2)/64)).toString() + (movesHistory[movesHistory.length-1][2].slice(0,-2)/64).toString(); // i sled tova smenqme id
+   console.log((7- (movesHistory[movesHistory.length-1][1].slice(0,-2)/piecesWidth)).toString()
+   +""+ (movesHistory[movesHistory.length-1][2].slice(0,-2)/piecesWidth).toString());
+    lastPiece.id = (7- (movesHistory[movesHistory.length-1][1].slice(0,-2)/piecesWidth)).toString()
+     +""+ (movesHistory[movesHistory.length-1][2].slice(0,-2)/piecesWidth).toString(); // i sled tova smenqme id
     
     if(movesHistory[movesHistory.length-1][3]!==undefined){ //ako e vzeta figura na protivnika
      board[Number(movesHistory[movesHistory.length-1][0][0])][Number(movesHistory[movesHistory.length-1][0][1])] = movesHistory[movesHistory.length-1][3];
@@ -664,7 +708,6 @@ function moveBackwards(){
     else{
         board[Number(movesHistory[movesHistory.length-1][0][0])][Number(movesHistory[movesHistory.length-1][0][1])] = [];
     }
-    
     board[lastPiece.id[0]][lastPiece.id[1]] = currentPiece[currentPiece.length-1];
     console.log(board[lastPiece.id[0]][lastPiece.id[1]]);
     board[lastPiece.id[0]][lastPiece.id[1]][2] = [Number(lastPiece.id[0]),Number(lastPiece.id[1])];
@@ -674,8 +717,31 @@ function moveBackwards(){
         board = [[['R','w',[0,0]],['N','w',[0,1]],['B','w',[0,2]],['Q','w',[0,3]],['K','w',[0,4]],['B','w',[0,5]],['N','w',[0,6]],['R','w',[0,7]]],[['P','w',[1,0],true],['P','w',[1,1],true],['P','w',[1,2],true],['P','w',[1,3],true],['P','w',[1,4],true],['P','w',[1,5],true],['P','w',[1,6],true],['P','w',[1,7],true]],[[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[]],[['P','b',[6,0],true],['P','b',[6,1],true],['P','b',[6,2],true],['P','b',[6,3],true],['P','b',[6,4],true],['P','b',[6,5],true],['P','b',[6,6],true],['P','b',[6,7],true]],[['R','b',[7,0]],['N','b',[7,1]],['B','b',[7,2]],['Q','b',[7,3]],['K','b',[7,4]],['B','b',[7,5]],['N','b',[7,6]],['R','b',[7,7]]]]
 
     }
+
+    
     if(playerTurn == 'w') playerTurn = 'b';
     else playerTurn = 'w';
+    if(playerTurn == 'w'){
+        if(document.getElementsByClassName("moves-history-span-counter").length!==1){
+            document.getElementsByClassName("moves-history-span")[document.getElementsByClassName("moves-history-span").length-1].outerHTML = "";
+        }
+        else{
+            document.getElementsByClassName("moves-history-span-white")[document.getElementsByClassName("moves-history-span-white").length-1].outerHTML = "";
+
+        }
+    }
+    else{
+        movesPlayed--;
+        document.getElementsByClassName("moves-history-span-black")[document.getElementsByClassName("moves-history-span-black").length-1].outerHTML = "";
+       
+    }
+    if(movesPlayed<=0){
+        var newSpanContainer = document.createElement('SPAN');
+        newSpanContainer.setAttribute("class","moves-history-span");
+        document.getElementsByClassName("moves-history")[0].appendChild(newSpanContainer);
+        movesPlayed = 1;
+    }
+
 }
 function addPiece(to,type,whiteOrBlack){
     
@@ -1098,11 +1164,13 @@ function showEndGameModal(winner,how){
 function resetGame(){
     board = [[['R','w',[0,0]],['N','w',[0,1]],['B','w',[0,2]],['Q','w',[0,3]],['K','w',[0,4]],['B','w',[0,5]],['N','w',[0,6]],['R','w',[0,7]]],[['P','w',[1,0],true],['P','w',[1,1],true],['P','w',[1,2],true],['P','w',[1,3],true],['P','w',[1,4],true],['P','w',[1,5],true],['P','w',[1,6],true],['P','w',[1,7],true]],[[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[]],[['P','b',[6,0],true],['P','b',[6,1],true],['P','b',[6,2],true],['P','b',[6,3],true],['P','b',[6,4],true],['P','b',[6,5],true],['P','b',[6,6],true],['P','b',[6,7],true]],[['R','b',[7,0]],['N','b',[7,1]],['B','b',[7,2]],['Q','b',[7,3]],['K','b',[7,4]],['B','b',[7,5]],['N','b',[7,6]],['R','b',[7,7]]]];
     document.getElementsByClassName("board")[0].outerHTML = "<div class='board'><div class='piece rook-black' id='70'></div><div class='piece knight-black' id='71'></div><div class='piece bishop-black' id='72'></div><div class='piece queen-black' id='73'></div><div class='piece king-black' id='74'></div><div class='piece bishop-black' id='75'></div><div class='piece knight-black' id='76'></div><div class='piece rook-black' id='77'></div><div class='piece pawn-black' id='60'></div><div class='piece pawn-black' id='61'></div><div class='piece pawn-black' id='62'></div><div class='piece pawn-black' id='63'></div><div class='piece pawn-black' id='64'></div><div class='piece pawn-black' id='65'></div><div class='piece pawn-black' id='66'></div><div class='piece pawn-black' id='67'>     </div><div class='piece pawn-white' id='10'></div><div class='piece pawn-white' id='11'>     </div><div class='piece pawn-white' id='12'></div><div class='piece pawn-white' id='13'>     </div><div class='piece pawn-white' id='14'></div><div class='piece pawn-white' id='15'>     </div><div class='piece pawn-white' id='16'></div><div class='piece pawn-white' id='17'>     </div><div class='piece rook-white' id='00'></div><div class='piece knight-white' id='01'>     </div><div class='piece bishop-white' id='02'></div><div class='piece queen-white' id='03'>     </div><div class='piece king-white' id='04'></div><div class='piece bishop-white' id='05'></div><div class='piece knight-white' id='06'></div><div class='piece rook-white' id='07'></div>     </div>"
+    document.getElementsByClassName("moves-history")[0].outerHTML = "<span class='moves-history'><span class='moves-history-span'><span class='moves-history-span-counter' id='moves-history-span-1'>1.</span></span></span>";
     init();
+    movesPlayed = 1;
     playerTurn = 'w';
     document.getElementsByClassName("board")[0].onclick = function(e){
         onBoardClick(e);
     };
-    whiteKingChecked = false; blackKingChecked = false;
+    
 }
 

@@ -9,7 +9,9 @@
 html, body{
     width: 100%;
     height: 100%;
+    overflow: hidden;
     background-color: #eee;
+   
 }
 
 .container{
@@ -19,6 +21,7 @@ html, body{
     background-color: #eee;
     height: 100%;
     overflow: auto;
+    
 }
 .board{
     box-sizing: content-box;
@@ -26,21 +29,42 @@ html, body{
     width: 512px;
     position: absolute;
     top: 23%;
-    left: 0%;
+    left: 3%;
     background-image: url(img/board/board.png);
     border: 2px solid black;
+   
+}
+.moves-history-container{
+    position: absolute;
+    right: 3%;
+    top: calc(23% - 40px);
+    height: 240px;
+    width: 300px;
 }
 .moves-history{
+    top: 40px;
     position: absolute;
     height: 200px;
     width: 300px;
-    right: 5%;
-    top: 23%;
     background-color: #fff;
     box-shadow: 1px 1px 1px rgba(255,255,255,0.25), 0 5px 5px rgba(0,0,0,0.22);
     padding: 7px;
     padding-left: 12px;
-    overflow-y: scroll;
+    overflow-y: auto;
+    
+}
+.moves-history-container>p{
+    display: block;
+    height: 40px;
+    width: 100%;
+    color: black;
+   overflow-y: visible;
+    padding-left: 10px;
+    font-size: 25px;
+    font-family: 'Open Sans', sans-serif;
+    position: absolute;
+    top: 0px;
+    left: 0px;
 }
 .moves-history-span{
     display: inline-block;
@@ -179,13 +203,21 @@ html, body{
     background-image: url(img/square-board.png);
 }
 
-
+.last-move{
+    height: 64px;
+    width: 64px;
+    position: absolute;
+    background-color: rgb(191, 215, 255,0.7);
+    z-index: 0;
+    display: none;
+}
 .piece{
     cursor: pointer;
     transition: 0.2s;
     position: absolute;
     height: 64px;
     width: 64px;
+    z-index: 1;
 }
 .pawn-black{
    
@@ -241,18 +273,39 @@ html, body{
     background-size: contain;
 }
 
-@media (max-width: 512px){
+@media (max-width: 516px){
+    .last-move{
+        height: calc(100vw / 8);
+        width: calc(100vw / 8);
+    }
     .board{
-        height: 100vw;
-        width: 100vw;
+        width: calc(100vw - 4px);
+        height: calc(100vw - 4px);
         background-size: contain; 
     }
-    .piece{
+    .square-frame{
+        background-size: cover;
+    }
+    .piece, .square-frame{
+
         height: calc(100vw / 8);
         width: calc(100vw / 8);
     }
     .score-div{
         margin-top: 7vw;
+    }
+    .moves-history{
+        display: none;
+    }
+}
+@media (max-width: 900px){
+    
+    .moves-history-container{
+        display: none;
+    }
+    .board{
+        left: 50%;
+        transform: translateX(-50%);
     }
 }
 @media (min-width: 1000px){
