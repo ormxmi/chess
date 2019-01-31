@@ -56,8 +56,21 @@
                 </div>   
                 <div class="last-move last-move-start"></div>
                 <div class="last-move last-move-end"></div>
-            </div>
 
+                <div class="promotion promotion-white">
+                    <div class="promotion-inner rook-white" onclick="selectedPromotionPiece('R')"></div><div class="promotion-inner queen-white" onclick="selectedPromotionPiece('Q')">
+                    </div><div class="promotion-inner knight-white" onclick="selectedPromotionPiece('N')">
+                    </div><div class="promotion-inner bishop-white" onclick="selectedPromotionPiece('B')">
+                    </div>
+                </div>
+                <div class="promotion promotion-black">
+                    <div class="promotion-inner rook-black" onclick="selectedPromotionPiece('R')"></div><div class="promotion-inner queen-black" onclick="selectedPromotionPiece('Q')">
+                    </div><div class="promotion-inner knight-black" onclick="selectedPromotionPiece('N')">
+                    </div><div class="promotion-inner bishop-black" onclick="selectedPromotionPiece('B')">
+                    </div>
+                </div>
+            </div>
+           
             <div class="moves-history-container">
                 <p>Moves history</p>
                 <div class="moves-history">
@@ -65,7 +78,7 @@
                 </div>
             </div>
             
-            <h1 style="position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%);font-size: calc(1.5vw + 10px); font-family: 'Open Sans',sans-serif;">CTRL + Z za da vurne6 1 hod!!!! </h1>
+            <h1 class="info" >CTRL + Z to undo a move! </h1>
 
         </div>
    </div>

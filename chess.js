@@ -10,6 +10,8 @@ var currentPiece = [];
 var currentPieceCoords = [];
 var currentPieceHTML;
 var movesHistory = [];
+var promotionPiece = "none"; var selectingPromotionPiece = false;
+var pawnPromoteBlack = false; var pawnPromoteWhite = false; var promoteCoords = [];
 var selectedPiece = false;let squaresToCheck ;
 let largerPos = 0, lesserPos = 0;  points = [0,0];
 let ctrlClicked = false; zClicked = false;
@@ -22,38 +24,38 @@ init();//////
 /////////////
 
 document.getElementsByClassName("board")[0].onclick = function(e){
-    onBoardClick(e);
+    if(!selectingPromotionPiece){
+        onBoardClick(e);
+    }
 };
 
 
 
 function onBoardClick(e){
-    let squareClickedY = 7 - Math.floor((e.clientY - offsetTop)/piecesWidth);
-    let squareClickedX = Math.floor((e.clientX - offsetLeft)/piecesWidth);
-    console.log(squareClickedY,squareClickedX);
-    moveName = horizontal[squareClickedX] + (squareClickedY+1).toString();
    
+        let squareClickedY = 7 - Math.floor((e.clientY - offsetTop)/piecesWidth);
+        let squareClickedX = Math.floor((e.clientX - offsetLeft)/piecesWidth);
+        moveName = horizontal[squareClickedX] + (squareClickedY+1).toString();
     
-    selectPiece(squareClickedY,squareClickedX);
+        selectPiece(squareClickedY,squareClickedX);
     
-   
 
-    
 }
 
 function selectPiece(y,x){
-
-    if(board[y][x][1]==playerTurn){
-        selectedPiece = true;
-        showAvailableMoves(y,x);
-        return true;
-    }
-    else{
-        if(!selectedPiece) return false;
-        else{
-            movePiece(y,x);
+    
+        if(board[y][x][1]==playerTurn){
+            selectedPiece = true;
+            showAvailableMoves(y,x);
+            return true;
         }
-    }
+        else{
+            if(!selectedPiece) return false;
+            else{
+                movePiece(y,x);
+            }
+        }
+    
 }
 
 function showAvailableMoves(y,x){
@@ -92,9 +94,11 @@ function showAvailableMoves(y,x){
 }
 
 function pawnMove(y,x){
-
+    
     if(playerTurn=='w'){
+        pawnPromoteWhite = false;
             if(board[y+1][x].length==0&&nextKingMoveLegal([y,x],[y+1,x])){ 
+                if(y+1==7) pawnPromoteWhite = true;
                 availableMoves.push([y+1,x]);
                 appendFrame(y+1,x);
                 if(y==1&&nextKingMoveLegal([y,x],[y+2,x])){  //if 1st move pawn - can move 2 squares
@@ -105,16 +109,20 @@ function pawnMove(y,x){
                 }
             }
             if(y+1<=7 && x+1<=7 && board[y+1][x+1].length > 0 &&board[y+1][x+1][1]!==playerTurn&&nextKingMoveLegal([y,x],[y+1,x+1])){
+                if(y+1==7) pawnPromoteWhite = true;
                 availableMoves.push([y+1,x+1]);
                 appendFrame(y+1,x+1);
             }
             if(y+1<=7 && x-1>=0 && board[y+1][x-1].length > 0 &&board[y+1][x-1][1]!==playerTurn&&nextKingMoveLegal([y,x],[y+1,x-1])){
+                if(y+1==7) pawnPromoteWhite = true;
                 availableMoves.push([y+1,x-1]);
                 appendFrame(y+1,x-1);
             }
     }
     else{
+        pawnPromoteBlack = false;
         if(board[y-1][x].length==0&&nextKingMoveLegal([y,x],[y-1,x])){ 
+            if(y-1==0) pawnPromoteBlack = true;
             availableMoves.push([y-1,x]);
             appendFrame(y-1,x);
             if(y==6&&nextKingMoveLegal([y,x],[y-2,x])){  //if 1st move pawn - can move 2 squares
@@ -125,10 +133,12 @@ function pawnMove(y,x){
             }
         }
         if(y-1>=0 && x+1<=7 && board[y-1][x+1].length > 0 &&board[y-1][x+1][1]!==playerTurn&&nextKingMoveLegal([y,x],[y-1,x+1])){
+            if(y-1==0) pawnPromoteBlack = true;
             availableMoves.push([y-1,x+1]);
             appendFrame(y-1,x+1);
         }
         if(y-1>=0 && x-1>=0 && board[y-1][x-1].length > 0 &&board[y-1][x-1][1]!==playerTurn&&nextKingMoveLegal([y,x],[y-1,x-1])){
+            if(y-1==0) pawnPromoteBlack = true;
             availableMoves.push([y-1,x-1]);
             appendFrame(y-1,x-1);
         }
@@ -348,12 +358,12 @@ function bishopMove(y,x){
     }
 
     for(var l1 = 1;l1<=squaresToCheckDown;l1++){
-        console.log(l1,squaresToCheckDown);
+       
         if(y-l1>=0&&x+l1<=7){
             if(board[y-l1][x+l1].length!==0){
                 if(board[y-l1][x+l1][1]==playerTurn){ 
                     l1 = 9; //encountered friendly piece. stop the loop
-                    console.log("hi");
+                   
                 }
                 else{
                     if(nextKingMoveLegal([y,x],[y-l1,x+l1])){
@@ -361,12 +371,12 @@ function bishopMove(y,x){
                         appendFrame(y-l1,x+l1);
                     }
                     l1 = 9; //encountered enemy piece. stop the loop
-                    console.log("hi");
+                 
                 }
             }
             if(l1==9) break;
             if(nextKingMoveLegal([y,x],[y-l1,x+l1])){
-                console.log("hi");
+              
                 availableMoves.push([y-l1,x+l1]);
                 appendFrame(y-l1,x+l1); 
             }
@@ -415,13 +425,11 @@ function kingMove(y,x){
         appendFrame(y,x+2);
         castlingShort = true;
         
-        console.log("castling!")
     }
     if(board[y][x][3]==true&&board[y][x-4][1]==playerTurn&&board[y][x-4][0]=='R'&&board[y][x-4][3]&&board[y][x-1].length==0&&board[y][x-2].length==0&&nextKingMoveLegal([y,x],[y,x-1])&&nextKingMoveLegal([y,x],[y,x-2])){
         availableMoves.push([y,x-2]);
         appendFrame(y,x-2);
         castlingLong = true;
-        console.log("castling! queen side")
     }
 }
 
@@ -458,7 +466,6 @@ function movePiece(y,x){
             }
         }
     }
-    else console.log("illegal move"); 
 }
 
 function updateMovesHistoryHTML(side){
@@ -478,7 +485,6 @@ function updateMovesHistoryHTML(side){
         }
         var newSpanWhiteMove = document.createElement("SPAN");
         newSpanWhiteMove.setAttribute("class","moves-history-span-white");
-        console.log(moveName);
         if(moveName == "O-O"||moveName == "O-O-O"){
             document.getElementsByClassName("moves-history-span-counter")[document.getElementsByClassName("moves-history-span-counter").length-2].outerHTML = "";
             document.getElementsByClassName("moves-history-span-white")[document.getElementsByClassName("moves-history-span-white").length-1].outerHTML = "";
@@ -492,7 +498,6 @@ function updateMovesHistoryHTML(side){
         movesPlayed++;
         var newSpanBlackMove = document.createElement("SPAN");
         newSpanBlackMove.setAttribute("class","moves-history-span-black");
-        console.log(moveName);
         if(moveName == "O-O"||moveName == "O-O-O"){
             document.getElementsByClassName("moves-history-span-black")[document.getElementsByClassName("moves-history-span-black").length-1].outerHTML = "";
             pieceName = "";
@@ -503,28 +508,71 @@ function updateMovesHistoryHTML(side){
     }
 }
 
+function pawnPromoteShow(coords){
+    let pawnPromoteOffset = coords[1]*piecesWidth-piecesWidth-piecesWidth/2;
+    if(pawnPromoteOffset<0) pawnPromoteOffset = 0;
+    selectingPromotionPiece = true;
+    if(playerTurn == 'w'){
+        document.getElementsByClassName("promotion-white")[0].style.display = "block";
+        
+        document.getElementsByClassName("promotion-white")[0].style.left = pawnPromoteOffset+"px";
+        
+    }
+    else{
+        document.getElementsByClassName("promotion-black")[0].style.display = "block";
+        document.getElementsByClassName("promotion-black")[0].style.left = pawnPromoteOffset+"px";
+    }
+}
+function selectedPromotionPiece(piece){
+    let addPieceSide = "";
+    
+    if(playerTurn == 'w'){
+        document.getElementsByClassName("promotion-black")[0].style.display = "none";
+        addPieceSide = 'b';
+    }
+    else{
+        document.getElementsByClassName("promotion-white")[0].style.display = "none";
+        addPieceSide = 'w';
+    }
+    
+    document.getElementById(currentPiece[currentPiece.length-1][2][0]+""+currentPiece[currentPiece.length-1][2][1]).outerHTML = "";
+    board[currentPiece[currentPiece.length-1][2][0]][currentPiece[currentPiece.length-1][2][1]] = [piece,addPieceSide,promoteCoords];
+    addPiece(promoteCoords,piece,addPieceSide);
+    setTimeout(()=>{selectingPromotionPiece = false;},50);
+    
+}
 function movePieceTrue(y,x){
-    console.log(currentPieceCoords);
     currentPiece.push(board[currentPieceCoords[0]][currentPieceCoords[1]]);
     if(currentPiece[currentPiece.length-1][0]=='R'&&currentPiece[currentPiece.length-1][3])currentPiece[currentPiece.length-1][3]=false;
-
+   
     let pieceToRemove = document.getElementById(y.toString()+x.toString());
     updateBoardVisualHTML(y,x);
     removeOtherFrames();
     
     if(board[y][x].length>0 && board[y][x][1]!==playerTurn){ //taking another piece
-        
-       
         movesHistory[movesHistory.length-1].push(board[y][x]);
         setTimeout(function(){
             pieceToRemove.outerHTML = "";
         },100)
     } 
+
+    if(board[currentPieceCoords[0]][currentPieceCoords[1]][0]=='P'){
+        
+        if(playerTurn == 'w' && board[currentPieceCoords[0]][currentPieceCoords[1]][1]=='w' && pawnPromoteWhite && y == 7){
+            pawnPromoteShow([y,x]);
+            promoteCoords = [y,x];
+        }
+        else if(playerTurn == 'b' && board[currentPieceCoords[0]][currentPieceCoords[1]][1]=='b'&& pawnPromoteBlack && y == 0){
+            pawnPromoteShow([y,x]);
+            promoteCoords = [y,x];
+        }
+    }
     pieceMoveSoundFx.play();
     board[y][x] = currentPiece[currentPiece.length-1];
     board[currentPiece[currentPiece.length-1][2][0]][currentPiece[currentPiece.length-1][2][1]] = [];
     board[y][x][2] = [y,x];
-
+    
+   
 
     
     updateMovesHistoryHTML(playerTurn);
@@ -534,7 +582,6 @@ function movePieceTrue(y,x){
     else playerTurn = 'w'
   
     if(!nextKingMoveLegal(findKing(),findKing())){
-        console.log(playerTurn,"checked");
         let isNotCheckmated = false;
         for(var l = 0;l<=7;l++){
             for(var z = 0;z<=7;z++){       
@@ -543,7 +590,6 @@ function movePieceTrue(y,x){
                     showAvailableMoves(l,z);
                     if(availableMoves.length>0){
                      
-                        console.log([l,z],availableMoves);
                         isNotCheckmated = true;
                     }
                 }
@@ -692,12 +738,10 @@ function moveBackwards(){
     removeOtherFrames();
 
 
-    console.log(currentPiece)
     let lastPiece = document.getElementById(movesHistory[movesHistory.length-1][0]); //vrushtame sushtestvuvashtata figura nazad
     lastPiece.style.top = movesHistory[movesHistory.length-1][1]; //
     lastPiece.style.left = movesHistory[movesHistory.length-1][2]; //
-   console.log((7- (movesHistory[movesHistory.length-1][1].slice(0,-2)/piecesWidth)).toString()
-   +""+ (movesHistory[movesHistory.length-1][2].slice(0,-2)/piecesWidth).toString());
+  
     lastPiece.id = (7- (movesHistory[movesHistory.length-1][1].slice(0,-2)/piecesWidth)).toString()
      +""+ (movesHistory[movesHistory.length-1][2].slice(0,-2)/piecesWidth).toString(); // i sled tova smenqme id
     
@@ -709,7 +753,6 @@ function moveBackwards(){
         board[Number(movesHistory[movesHistory.length-1][0][0])][Number(movesHistory[movesHistory.length-1][0][1])] = [];
     }
     board[lastPiece.id[0]][lastPiece.id[1]] = currentPiece[currentPiece.length-1];
-    console.log(board[lastPiece.id[0]][lastPiece.id[1]]);
     board[lastPiece.id[0]][lastPiece.id[1]][2] = [Number(lastPiece.id[0]),Number(lastPiece.id[1])];
     movesHistory.splice(-1,1);
     currentPiece.splice(-1,1);
