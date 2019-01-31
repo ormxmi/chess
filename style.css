@@ -350,6 +350,9 @@ html, body{
     .promotion-white{
         bottom: calc(100vw / -8);
     }
+    .info{
+        display: none;
+    }
 }
 @media (max-width: 900px){
     
