@@ -784,6 +784,9 @@ function moveBackwards(){
         document.getElementsByClassName("moves-history")[0].appendChild(newSpanContainer);
         movesPlayed = 1;
     }
+    
+      document.getElementsByClassName("last-move-start")[0].style.display = "none";
+      document.getElementsByClassName("last-move-end")[0].style.display = "none";
 
 }
 function addPiece(to,type,whiteOrBlack){
